@@ -98,8 +98,12 @@ def fetch_fundamentals(symbol: str) -> dict:
 def load_fundamentals_for_stocks(symbols: list) -> dict:
     """Batch fetch fundamentals for all symbols. Returns symbol -> dict."""
     results = {}
+    total = len(symbols)
     for i, sym in enumerate(symbols):
+        print(f"  [{i + 1}/{total}] fundamentals: {sym}", flush=True)
         results[sym] = fetch_fundamentals(sym)
+        if (i + 1) % 10 == 0 or i == total - 1:
+            print(f"  fundamentals progress: {i + 1}/{total}", flush=True)
         time.sleep(2.0 if i % 10 == 9 else 0.5)
     return results
 
