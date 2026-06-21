@@ -1,10 +1,13 @@
 version: 2.1
 
-jobs:
-  test:
+executors:
+  python:
     docker:
       - image: cimg/python:3.11
     working_directory: ~/project
+
+commands:
+  install_dependencies:
     steps:
       - checkout
       - run:
@@ -12,11 +15,80 @@ jobs:
           command: |
             python -m pip install --upgrade pip
             pip install -r requirements.txt
+
+jobs:
+  unit_tests:
+    executor: python
+    steps:
+      - install_dependencies
       - run:
           name: Run unit tests
           command: python -m unittest discover -s tests
 
+  train_models:
+    executor: python
+    steps:
+      - install_dependencies
+      - run:
+          name: Train models
+          command: python -u train.py
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - models
+            - output
+
+  run_main_scan:
+    executor: python
+    steps:
+      - install_dependencies
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Run daily scan
+          command: python -u main.py
+
+  run_fill_outcomes:
+    executor: python
+    steps:
+      - install_dependencies
+      - run:
+          name: Fill outcomes
+          command: python -u fill_outcomes.py
+
 workflows:
-  build-and-test:
+  build-test-train-daily:
     jobs:
-      - test
+      - unit_tests
+      - train_models:
+          requires:
+            - unit_tests
+          filters:
+            branches:
+              only: main
+      - hold_run_main_scan:
+          type: approval
+          requires:
+            - train_models
+          filters:
+            branches:
+              only: main
+      - run_main_scan:
+          requires:
+            - hold_run_main_scan
+          filters:
+            branches:
+              only: main
+      - hold_run_fill_outcomes:
+          type: approval
+          requires:
+            - unit_tests
+          filters:
+            branches:
+              only: main
+      - run_fill_outcomes:
+          requires:
+            - hold_run_fill_outcomes
+          filters:
+            branches:
+              only: main
