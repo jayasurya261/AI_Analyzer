@@ -1,0 +1,20 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+token.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Local artifacts (large, derived, regenerated each run)
+cache/
+checkpoints/
+output/
+logs/
+data/
+models/
