@@ -61,6 +61,13 @@ jobs:
 
 workflows:
   build-test-train-daily:
+    triggers:
+      - schedule:
+          cron: "30 11 * * *"
+          filters:
+            branches:
+              only:
+                - main
     jobs:
       - unit_tests
       - train_models:
