@@ -76,29 +76,15 @@ workflows:
           filters:
             branches:
               only: main
-      - hold_run_main_scan:
-          type: approval
+      - run_main_scan:
           requires:
             - train_models
           filters:
             branches:
               only: main
-      - run_main_scan:
-          requires:
-            - hold_run_main_scan
-          filters:
-            branches:
-              only: main
-      - hold_run_fill_outcomes:
-          type: approval
-          requires:
-            - unit_tests
-          filters:
-            branches:
-              only: main
       - run_fill_outcomes:
           requires:
-            - hold_run_fill_outcomes
+            - train_models
           filters:
             branches:
               only: main
