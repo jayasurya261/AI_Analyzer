@@ -84,7 +84,7 @@ workflows:
               only: main
       - run_fill_outcomes:
           requires:
-            - train_models
+            - run_main_scan
           filters:
             branches:
               only: main
